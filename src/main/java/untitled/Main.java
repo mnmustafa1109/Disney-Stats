@@ -43,15 +43,9 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        CSVReader csvReader = null;
+        CSVReader csvReader ;
 
-
-        int director_ent_id = 1;
-        int actor_ent_id = 1;
-        int genre_ent_id = 1;
-        int country_ent_id = 1;
-
-        Connection myconn = null;
+        Connection connection = null;
         String user ="mnmustafa1109";
         String pass="Lover@1109";
         String insertEntertainment =  "INSERT INTO entertainment (show_id, rating , date_added, release_year) VALUES ( ? , ? , ?, ?)";
@@ -66,7 +60,7 @@ public class Main {
         String insertG_ent=  "INSERT INTO entertainment_genre (show_id, genre_id) VALUES ( ? , ? )";
 
         try {
-            myconn = DriverManager.getConnection("jdbc:mariadb://localhost:3306/test", user, pass);}
+            connection = DriverManager.getConnection("jdbc:mariadb://localhost:3306/test", user, pass);}
         catch(Exception exc){
             exc.printStackTrace();
             System.out.println("Error connecting to database");
@@ -102,17 +96,16 @@ public class Main {
                 String [] genre_name= splitWords(line[10]);
                 String description = line[11];
 
-                System.out.println("show_id: " + show_id + " type: " + line[1] + " title: " + title + " director: " + line[3] + " cast: " + line[4] + " country: " + line[5] + " date_added: " + date_added + " release_year: " + release_year + " rating: " + rating + " duration: " + line[9] + " listed_in: " + line[10] + " description: " + description + "\n\n\n");
                 System.out.println("show_id: " + show_id + "\n\n\n");
 
                 try{
-                    assert myconn != null;
-                    PreparedStatement pstmt = myconn.prepareStatement(insertEntertainment);
-                    pstmt.setString(1, show_id);
-                    pstmt.setString(2, rating);
-                    pstmt.setString(3, date_added);
-                    pstmt.setString(4, release_year);
-                    pstmt.executeUpdate();
+                    assert connection != null;
+                    PreparedStatement preparedStatement = connection.prepareStatement(insertEntertainment);
+                    preparedStatement.setString(1, show_id);
+                    preparedStatement.setString(2, rating);
+                    preparedStatement.setString(3, date_added);
+                    preparedStatement.setString(4, release_year);
+                    preparedStatement.executeUpdate();
 
                 }
                 catch(SQLException e) {
@@ -121,45 +114,41 @@ public class Main {
                 }
 
                 try {
-                    PreparedStatement pstmt = myconn.prepareStatement(insertENT_DESC);
-                    pstmt.setString(1, show_id);
-                    pstmt.setString(2, title);
-                    pstmt.setString(3, description);
-                    pstmt.setString(4, duration);
-                    pstmt.executeUpdate();
+                    PreparedStatement preparedStatement = connection.prepareStatement(insertENT_DESC);
+                    preparedStatement.setString(1, show_id);
+                    preparedStatement.setString(2, title);
+                    preparedStatement.setString(3, description);
+                    preparedStatement.setString(4, duration);
+                    preparedStatement.executeUpdate();
 
                 }
                 catch   (SQLException e) {
-                    System.out.println("Error inserting into table");
-                    System.out.println("show_id: " + show_id + " title: " + title + " description: " + description +"\n\n\n");
                     e.printStackTrace();
                 }
 
                 try {
                     for (String directorName : director_names) {
-                        PreparedStatement pstmt = myconn.prepareStatement(insertDirector);
-                        pstmt.setString(1, directorName);
+                        PreparedStatement preparedStatement = connection.prepareStatement(insertDirector);
+                        preparedStatement.setString(1, directorName);
                         String Check = "SELECT * FROM director WHERE director_name = ?";
-                        PreparedStatement pstmt2 = myconn.prepareStatement(Check);
-                        pstmt2.setString(1, directorName);
-                        ResultSet rs = pstmt2.executeQuery();
+                        PreparedStatement preparedStatement1 = connection.prepareStatement(Check);
+                        preparedStatement1.setString(1, directorName);
+                        ResultSet rs = preparedStatement1.executeQuery();
                         if (!rs.next()) {
-                            pstmt.executeUpdate();
+                            preparedStatement.executeUpdate();
                         }
                     }
                 }
                 catch (SQLException e) {
-                    System.out.println("Error inserting into table");
-                    System.out.println("director_num: " + director_ent_id + " director_name: " + director_names[0] +"\n\n\n");
                     e.printStackTrace();
                 }
 
                 try {
                     for (String directorName : director_names) {
-                        PreparedStatement preparedStatement = myconn.prepareStatement(insertD_ent);
+                        PreparedStatement preparedStatement = connection.prepareStatement(insertD_ent);
                         preparedStatement.setString(1, show_id);
                         String Check = "SELECT director_id FROM director WHERE director_name = ?";
-                        PreparedStatement prepareStatement = myconn.prepareStatement(Check);
+                        PreparedStatement prepareStatement = connection.prepareStatement(Check);
                         prepareStatement.setString(1, directorName);
                         ResultSet rs = prepareStatement.executeQuery();
                         if (rs.next()) {
@@ -169,17 +158,15 @@ public class Main {
                     }
                 }
                 catch (SQLException e) {
-                    System.out.println("Error inserting into table");
-                    System.out.println("director_num: " + director_ent_id + " show_id: " + show_id +"\n\n\n");
                     e.printStackTrace();
                 }
 
                 try {
                     for (String actorName : actor_name) {
-                        PreparedStatement preparedStatement = myconn.prepareStatement(insertActor);
+                        PreparedStatement preparedStatement = connection.prepareStatement(insertActor);
                         preparedStatement.setString(1, actorName);
                         String Check = "SELECT * FROM actor WHERE actor_name = ?";
-                        PreparedStatement preparedStatement1 = myconn.prepareStatement(Check);
+                        PreparedStatement preparedStatement1 = connection.prepareStatement(Check);
                         preparedStatement1.setString(1, actorName);
                         ResultSet rs = preparedStatement1.executeQuery();
                         if (!rs.next()) {
@@ -188,17 +175,15 @@ public class Main {
                     }
                 }
                 catch (SQLException e) {
-                    System.out.println("Error inserting into table");
-                    System.out.println("actor_num: " + actor_ent_id + " actor_name: " + actor_name[0] +"\n\n\n");
                     e.printStackTrace();
                 }
 
                 try {
                     for (String actorName : actor_name) {
-                        PreparedStatement preparedStatement = myconn.prepareStatement(insertA_ent);
+                        PreparedStatement preparedStatement = connection.prepareStatement(insertA_ent);
                         preparedStatement.setString(1, show_id);
                         String Check = "SELECT actor_id FROM actor WHERE actor_name = ?";
-                        PreparedStatement preparedStatement1 = myconn.prepareStatement(Check);
+                        PreparedStatement preparedStatement1 = connection.prepareStatement(Check);
                         preparedStatement1.setString(1, actorName);
                         ResultSet rs = preparedStatement1.executeQuery();
                         if (rs.next()) {
@@ -208,18 +193,16 @@ public class Main {
                     }
                 }
                 catch (SQLException e) {
-                    System.out.println("Error inserting into table");
-                    System.out.println("actor_num: " + actor_ent_id + " show_id: " + show_id +"\n\n\n");
                     e.printStackTrace();
                 }
 
 
                 try {
                     for (String countryName : country_names) {
-                        PreparedStatement preparedStatement = myconn.prepareStatement(insertCountry);
+                        PreparedStatement preparedStatement = connection.prepareStatement(insertCountry);
                         preparedStatement.setString(1, countryName);
                         String Check = "SELECT * FROM country WHERE country_name = ?";
-                        PreparedStatement preparedStatement1 = myconn.prepareStatement(Check);
+                        PreparedStatement preparedStatement1 = connection.prepareStatement(Check);
                         preparedStatement1.setString(1, countryName);
                         ResultSet rs = preparedStatement1.executeQuery();
                         if (!rs.next()) {
@@ -228,17 +211,15 @@ public class Main {
                     }
                 }
                 catch (SQLException e) {
-                    System.out.println("Error inserting into table");
-                    System.out.println("country_num: " + country_ent_id + " country_name: " + country_names[0] +"\n\n\n");
                     e.printStackTrace();
                 }
 
                 try {
                     for (String countryName : country_names) {
-                        PreparedStatement preparedStatement = myconn.prepareStatement(insertProduction_ent);
+                        PreparedStatement preparedStatement = connection.prepareStatement(insertProduction_ent);
                         preparedStatement.setString(1, show_id);
                         String Check = "SELECT country_id FROM country WHERE country_name = ?";
-                        PreparedStatement preparedStatement1 = myconn.prepareStatement(Check);
+                        PreparedStatement preparedStatement1 = connection.prepareStatement(Check);
                         preparedStatement1.setString(1, countryName);
                         ResultSet rs = preparedStatement1.executeQuery();
                         if (rs.next()) {
@@ -248,17 +229,15 @@ public class Main {
                     }
                 }
                 catch (SQLException e) {
-                    System.out.println("Error inserting into table");
-                    System.out.println("country_num: " + country_ent_id + " show_id: " + show_id +"\n\n\n");
                     e.printStackTrace();
                 }
 
                 try {
                     for (String genreName : genre_name) {
-                        PreparedStatement preparedStatement = myconn.prepareStatement(insertGenre);
+                        PreparedStatement preparedStatement = connection.prepareStatement(insertGenre);
                         preparedStatement.setString(1, genreName);
                         String Check = "SELECT * FROM genre WHERE genre_name = ?";
-                        PreparedStatement preparedStatement1 = myconn.prepareStatement(Check);
+                        PreparedStatement preparedStatement1 = connection.prepareStatement(Check);
                         preparedStatement1.setString(1, genreName);
                         ResultSet rs = preparedStatement1.executeQuery();
                         if (!rs.next()) {
@@ -267,17 +246,15 @@ public class Main {
                     }
                 }
                 catch (SQLException e) {
-                    System.out.println("Error inserting into table");
-                    System.out.println("genre_num: " + genre_ent_id + " genre_name: " + genre_name[0] +"\n\n\n");
                     e.printStackTrace();
                 }
 
                 try {
                     for (String genreName : genre_name) {
-                        PreparedStatement preparedStatement = myconn.prepareStatement(insertG_ent);
+                        PreparedStatement preparedStatement = connection.prepareStatement(insertG_ent);
                         preparedStatement.setString(1, show_id);
                         String Check = "SELECT genre_id FROM genre WHERE genre_name = ?";
-                        PreparedStatement preparedStatement1 = myconn.prepareStatement(Check);
+                        PreparedStatement preparedStatement1 = connection.prepareStatement(Check);
                         preparedStatement1.setString(1, genreName);
                         ResultSet rs = preparedStatement1.executeQuery();
                         if (rs.next()) {
@@ -287,8 +264,6 @@ public class Main {
                     }
                 }
                 catch (SQLException e) {
-                    System.out.println("Error inserting into table");
-                    System.out.println("genre_num: " + genre_ent_id + " show_id: " + show_id +"\n\n\n");
                     e.printStackTrace();
                 }
                
